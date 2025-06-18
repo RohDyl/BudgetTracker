@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Budget Tracker</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <h1>Daily Budget Tracker</h1>
+
+    <div class="input-section">
+        <label for="dateInput">Date:</label>
+        <input type="date" id="dateInput">
+
+        <label for="incomeInput">Income:</label>
+        <input type="number" id="incomeInput" placeholder="Enter income for the day">
+
+        <label for="expenseCategoryInput">Expense Category:</label>
+        <select id="expenseCategoryInput">
+            <!-- Options will be populated by JavaScript -->
+        </select>
+
+        <label for="expenseAmountInput">Expense Amount:</label>
+        <input type="number" id="expenseAmountInput" placeholder="Enter expense amount">
+
+        <label for="descriptionInput">Description (Optional):</label>
+        <input type="text" id="descriptionInput" placeholder="e.g., Groceries, Salary">
+
+        <button id="addEntryBtn">Add Entry</button>
+    </div>
+
+    <div class="monthly-budgets-section">
+        <h2>Monthly Budget Limits</h2>
+        <div id="budgetLimitsContainer">
+            <!-- Budget limit inputs will be dynamically added here by JavaScript -->
+        </div>
+        <button id="saveBudgetLimitsBtn">Save Budget Limits</button>
+    </div>
+
+    <div class="monthly-budget-summary-section">
+        <h2>Monthly Budget Usage (Current Month)</h2>
+        <div id="monthlyBudgetUsageContainer">
+            <!-- Monthly budget usage will be dynamically added here by JavaScript -->
+        </div>
+    </div>
+
+    <div class="summary-section">
+        <h2>Daily Summary</h2>
+        <p>Selected Date: <span id="selectedDateDisplay"></span></p>
+        <p>Total Income: R<span id="dailyIncomeDisplay">0.00</span></p>
+        <p>Total Expense: R<span id="dailyExpenseDisplay">0.00</span></p>
+        <p>Net Balance: R<span id="dailyBalanceDisplay">0.00</span></p>
+    </div>
+
+    <div class="entries-section">
+        <h2>All Entries</h2>
+        <div class="filter-section">
+            <label for="filterDate">Filter by Date:</label>
+            <input type="date" id="filterDate">
+            <button id="clearFilterBtn">Clear Filter</button>
+        </div>
+        <ul id="budgetEntriesList">
+            <!-- Budget entries will be dynamically added here by JavaScript -->
+        </ul>
+    </div>
+
+    <div class="overall-summary">
+        <h2>Overall Summary</h2>
+        <p>Total Income (All Time): R<span id="overallIncomeDisplay">0.00</span></p>
+        <p>Total Expense (All Time): R<span id="overallExpenseDisplay">0.00</span></p>
+        <p>Overall Balance: R<span id="overallBalanceDisplay">0.00</span></p>
+    </div>
+
+    <button id="clearAllDataBtn" class="clear-button">Clear All Saved Data</button>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

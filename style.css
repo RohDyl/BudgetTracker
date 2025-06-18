@@ -1,0 +1,284 @@
+body {
+font-family: 'Arial', sans-serif;
+background-color: #f4f7f6;
+color: #333;
+margin: 0;
+padding: 20px;
+display: flex;
+justify-content: center;
+align-items: flex-start;
+min-height: 100vh;
+}
+
+.container {
+background-color: #ffffff;
+padding: 30px;
+border-radius: 10px;
+box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+width: 100%;
+max-width: 800px;
+}
+
+h1, h2 {
+color: #2c3e50;
+text-align: center;
+margin-bottom: 25px;
+}
+
+.input-section, .summary-section, .entries-section, .overall-summary,
+.monthly-budgets-section, .monthly-budget-summary-section, .filter-section {
+background-color: #ecf0f1;
+padding: 20px;
+border-radius: 8px;
+margin-bottom: 20px;
+border: 1px solid #dde1e2;
+}
+
+.input-section label {
+display: block;
+margin-bottom: 8px;
+font-weight: bold;
+color: #555;
+}
+
+.input-section input[type="date"],
+.input-section input[type="number"],
+.input-section input[type="text"],
+.input-section select { /* Added select */
+width: calc(100% - 20px);
+padding: 10px;
+margin-bottom: 15px;
+border: 1px solid #ccc;
+border-radius: 5px;
+font-size: 1em;
+}
+
+.input-section button {
+background-color: #28a745; /* Green for Add */
+color: white;
+padding: 12px 20px;
+border: none;
+border-radius: 5px;
+cursor: pointer;
+font-size: 1.1em;
+width: 100%;
+transition: background-color 0.3s ease;
+}
+
+.input-section button:hover {
+background-color: #218838;
+}
+
+.summary-section p, .overall-summary p {
+font-size: 1.1em;
+margin-bottom: 10px;
+padding: 5px 0;
+border-bottom: 1px dashed #dcdcdc;
+}
+
+.summary-section p:last-child, .overall-summary p:last-child {
+border-bottom: none;
+font-weight: bold;
+color: #007bff; /* Blue for balance */
+}
+
+#dailyBalanceDisplay, #overallBalanceDisplay {
+color: #007bff;
+}
+
+#dailyBalanceDisplay.negative, #overallBalanceDisplay.negative {
+color: #dc3545; /* Red for negative balance */
+}
+
+/* Monthly Budgets Section Styling */
+#budgetLimitsContainer div {
+display: flex;
+align-items: center;
+margin-bottom: 10px;
+gap: 10px;
+}
+
+#budgetLimitsContainer label {
+flex: 1;
+font-weight: bold;
+color: #555;
+}
+
+#budgetLimitsContainer input[type="number"] {
+flex: 2;
+padding: 8px;
+border: 1px solid #ccc;
+border-radius: 5px;
+font-size: 0.9em;
+}
+
+.monthly-budgets-section button {
+background-color: #007bff;
+color: white;
+padding: 10px 15px;
+border: none;
+border-radius: 5px;
+cursor: pointer;
+font-size: 1em;
+width: 100%;
+margin-top: 10px;
+transition: background-color 0.3s ease;
+}
+
+.monthly-budgets-section button:hover {
+background-color: #0056b3;
+}
+
+/* Monthly Budget Usage Summary Styling */
+.monthly-budget-usage-item {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 8px 0;
+border-bottom: 1px dashed #dcdcdc;
+}
+
+.monthly-budget-usage-item:last-child {
+border-bottom: none;
+}
+
+.monthly-budget-usage-item .category-name {
+font-weight: bold;
+flex: 1;
+}
+
+.monthly-budget-usage-item .usage-amounts {
+text-align: right;
+flex: 1;
+}
+
+.monthly-budget-usage-item .usage-amounts .percentage {
+font-weight: bold;
+margin-left: 10px;
+}
+
+.monthly-budget-usage-item .usage-amounts .percentage.over-budget {
+color: #dc3545; /* Red for over budget */
+}
+
+.monthly-budget-usage-item .usage-amounts .percentage.under-budget {
+color: #28a745; /* Green for under budget */
+}
+
+.entries-section ul {
+list-style: none;
+padding: 0;
+}
+
+.entries-section li {
+background-color: #ffffff;
+border: 1px solid #e0e0e0;
+border-radius: 5px;
+padding: 15px;
+margin-bottom: 10px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.entries-section li .entry-details {
+flex-grow: 1;
+}
+
+.entries-section li .entry-date {
+font-weight: bold;
+color: #666;
+margin-bottom: 5px;
+display: block;
+}
+
+.entries-section li .entry-description {
+font-style: italic;
+color: #777;
+font-size: 0.9em;
+}
+
+.entries-section li .entry-category { /* New style for category */
+font-weight: bold;
+color: #4a4a4a;
+font-size: 0.95em;
+margin-top: 5px;
+display: block;
+}
+
+.entries-section li .entry-amount {
+font-weight: bold;
+font-size: 1.1em;
+margin-left: 15px;
+text-align: right;
+}
+
+.entries-section li .entry-amount.income {
+color: #28a745; /* Green */
+}
+
+.entries-section li .entry-amount.expense {
+color: #dc3545; /* Red */
+}
+
+.entries-section li button {
+background-color: #dc3545; /* Red for Delete */
+color: white;
+border: none;
+padding: 8px 12px;
+border-radius: 4px;
+cursor: pointer;
+font-size: 0.9em;
+margin-left: 10px;
+transition: background-color 0.3s ease;
+}
+
+.entries-section li button:hover {
+background-color: #c82333;
+}
+
+.filter-section {
+display: flex;
+align-items: center;
+gap: 10px;
+margin-bottom: 15px;
+}
+
+.filter-section input[type="date"] {
+flex-grow: 1;
+padding: 8px;
+border: 1px solid #ccc;
+border-radius: 5px;
+}
+
+.filter-section button {
+background-color: #007bff;
+color: white;
+padding: 8px 15px;
+border: none;
+border-radius: 5px;
+cursor: pointer;
+transition: background-color 0.3s ease;
+}
+
+.filter-section button:hover {
+background-color: #0056b3;
+}
+
+.clear-button {
+background-color: #6c757d; /* Grey for Clear All */
+color: white;
+padding: 12px 20px;
+border: none;
+border-radius: 5px;
+cursor: pointer;
+font-size: 1em;
+width: 100%;
+margin-top: 20px;
+transition: background-color 0.3s ease;
+}
+
+.clear-button:hover {
+background-color: #5a6268;
+}

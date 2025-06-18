@@ -24,6 +24,7 @@ const clearFilterBtn = document.getElementById('clearFilterBtn');
 const budgetLimitsContainer = document.getElementById('budgetLimitsContainer');
 const saveBudgetLimitsBtn = document.getElementById('saveBudgetLimitsBtn');
 const monthlyBudgetUsageContainer = document.getElementById('monthlyBudgetUsageContainer');
+const showBudgetCategorySelect = document.getElementById('showBudgetCategory'); // New: Dropdown to show specific budget limits
 
 // --- Data Storage ---
 let budgetEntries = JSON.parse(localStorage.getItem('budgetEntries')) || [];
@@ -68,6 +69,11 @@ function getCurrentMonth() {
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 }
 
+// Generate a clean ID from a category name
+function getCategoryId(categoryName) {
+    return `budget-${categoryName.replace(/[^a-zA-Z0-9]/g, '')}`;
+}
+
 // --- Data Persistence Functions ---
 
 function saveBudgetEntries() {
@@ -103,6 +109,35 @@ function populateExpenseCategories() {
     }
 }
 
+// New: Populate the dropdown for showing/adding budget limits
+function populateShowBudgetCategoryDropdown() {
+    showBudgetCategorySelect.innerHTML = '';
+
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = 'Select a category to show/add budget';
+    defaultOption.selected = true;
+    showBudgetCategorySelect.appendChild(defaultOption);
+
+    const showAllOption = document.createElement('option');
+    showAllOption.value = 'show-all';
+    showAllOption.textContent = 'Show All Categories';
+    showBudgetCategorySelect.appendChild(showAllOption);
+
+    for (const group in defaultCategories) {
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = group;
+        defaultCategories[group].forEach(category => {
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            optgroup.appendChild(option);
+        });
+        showBudgetCategorySelect.appendChild(optgroup);
+    }
+}
+
+// Render budget limit input fields (all of them, but hide by default)
 function renderBudgetLimits() {
     budgetLimitsContainer.innerHTML = ''; // Clear existing inputs
 
@@ -114,10 +149,12 @@ function renderBudgetLimits() {
 
     allCategories.forEach(category => {
         const div = document.createElement('div');
+        const inputId = getCategoryId(category);
+        div.id = `container-${inputId}`; // Container for the input field
+        div.classList.add('budget-limit-item'); // Add a class for styling/selection
+
         const label = document.createElement('label');
         label.textContent = category + ':';
-        // Create a valid ID by replacing spaces and special chars
-        const inputId = `budget-${category.replace(/[^a-zA-Z0-9]/g, '')}`;
         label.setAttribute('for', inputId);
 
         const input = document.createElement('input');
@@ -129,7 +166,32 @@ function renderBudgetLimits() {
         div.appendChild(label);
         div.appendChild(input);
         budgetLimitsContainer.appendChild(div);
+
+        // Initially hide if no budget is set for it
+        if (!monthlyBudgets[category] && monthlyBudgets[category] !== 0) {
+            div.classList.remove('visible');
+        } else {
+            div.classList.add('visible');
+        }
     });
+}
+
+// New: Function to show a specific budget limit input
+function showBudgetLimitInput(category) {
+    const inputId = getCategoryId(category);
+    const container = document.getElementById(`container-${inputId}`);
+    if (container) {
+        container.classList.add('visible');
+        container.scrollIntoView({ behavior: 'smooth', block: 'center' }); // Scroll to it
+        const input = document.getElementById(inputId);
+        if (input) input.focus(); // Focus the input
+    }
+}
+
+// New: Function to show all budget limit inputs
+function showAllBudgetLimitInputs() {
+    const allItems = budgetLimitsContainer.querySelectorAll('.budget-limit-item');
+    allItems.forEach(item => item.classList.add('visible'));
 }
 
 // --- Summary and Display Functions ---
@@ -156,10 +218,10 @@ function updateMonthlyBudgetUsage() {
     let hasBudgetsToDisplay = false;
     allCategories.forEach(category => {
         const limit = monthlyBudgets[category];
-        if (limit !== undefined && limit > 0) { // Only show categories with a set, positive limit
+        if (limit !== undefined && limit >= 0) { // Show categories with a set limit (even if 0)
             hasBudgetsToDisplay = true;
             const spent = monthlySpent[category] || 0;
-            const percentage = (spent / limit * 100).toFixed(2);
+            const percentage = limit > 0 ? (spent / limit * 100).toFixed(2) : (spent > 0 ? '∞' : '0.00'); // Handle division by zero
 
             const div = document.createElement('div');
             div.classList.add('monthly-budget-usage-item');
@@ -170,16 +232,19 @@ function updateMonthlyBudgetUsage() {
 
             const usageAmountsSpan = document.createElement('span');
             usageAmountsSpan.classList.add('usage-amounts');
-            usageAmountsSpan.innerHTML = `R${spent.toFixed(2)} / R${limit.toFixed(2)}`;
+            // Format: Limit/Usage (Percentage%)
+            usageAmountsSpan.innerHTML = `R${limit.toFixed(2)} / R${spent.toFixed(2)}`;
 
             const percentageSpan = document.createElement('span');
             percentageSpan.classList.add('percentage');
-            if (parseFloat(percentage) > 100) {
+            if (parseFloat(percentage) > 100 || percentage === '∞') {
                 percentageSpan.classList.add('over-budget');
             } else {
                 percentageSpan.classList.remove('over-budget'); // Ensure class is removed if no longer over
                 if (parseFloat(percentage) > 0) { // Only add under-budget if some spending occurred
                     percentageSpan.classList.add('under-budget');
+                } else {
+                    percentageSpan.classList.remove('under-budget');
                 }
             }
             percentageSpan.textContent = ` (${percentage}%)`;
@@ -192,7 +257,7 @@ function updateMonthlyBudgetUsage() {
     });
 
     if (!hasBudgetsToDisplay) {
-        monthlyBudgetUsageContainer.innerHTML = '<p style="text-align: center; font-style: italic; color: #777;">No monthly budget limits set or all limits are zero. Set them above!</p>';
+        monthlyBudgetUsageContainer.innerHTML = '<p style="text-align: center; font-style: italic; color: #777;">No monthly budget limits set. Set them in the section above!</p>';
     }
 }
 
@@ -233,7 +298,6 @@ function renderEntries(filterDate = null) {
 
         const entryCategorySpan = document.createElement('span');
         entryCategorySpan.classList.add('entry-category');
-        // Only show category for expenses
         entryCategorySpan.textContent = entry.type === 'expense' && entry.category ? `Category: ${entry.category}` : '';
 
         const entryAmountSpan = document.createElement('span');
@@ -247,7 +311,7 @@ function renderEntries(filterDate = null) {
 
         entryDetails.appendChild(entryDateSpan);
         entryDetails.appendChild(entryDescriptionSpan);
-        if (entry.type === 'expense' && entry.category) { // Only append if it's an expense with a category
+        if (entry.type === 'expense' && entry.category) {
             entryDetails.appendChild(entryCategorySpan);
         }
 
@@ -326,16 +390,14 @@ function addEntry() {
         return;
     }
 
-    // Check if at least one of income or expense is entered
     if (isNaN(income) && isNaN(expenseAmount)) {
         alert('Please enter either an income or an expense amount.');
         return;
     }
 
-    // Handle income entry
     if (!isNaN(income) && income > 0) {
         budgetEntries.push({
-            id: Date.now(), // Unique ID
+            id: Date.now(),
             date: date,
             type: 'income',
             amount: income,
@@ -343,34 +405,36 @@ function addEntry() {
         });
     }
 
-    // Handle expense entry
     if (!isNaN(expenseAmount) && expenseAmount > 0) {
         if (!expenseCategory) {
             alert('Please select a category for the expense.');
             return;
         }
         budgetEntries.push({
-            id: Date.now() + 1, // Ensure unique ID if both are added quickly
+            id: Date.now() + 1,
             date: date,
             type: 'expense',
             amount: expenseAmount,
-            category: expenseCategory, // Add category
+            category: expenseCategory,
             description: description
         });
+
+        // New: Automatically show budget limit input for this category if not visible
+        showBudgetLimitInput(expenseCategory);
     }
 
     saveBudgetEntries();
     renderEntries(filterDateInput.value);
     updateDailySummary(filterDateInput.value);
     updateOverallSummary();
-    updateMonthlyBudgetUsage(); // Update monthly usage after adding entry
+    updateMonthlyBudgetUsage();
 
     // Clear input fields
     incomeInput.value = '';
     expenseAmountInput.value = '';
-    expenseCategoryInput.value = ''; // Reset category dropdown
+    expenseCategoryInput.value = '';
     descriptionInput.value = '';
-    dateInput.value = todayFormatted; // Reset date to today
+    dateInput.value = todayFormatted;
 }
 
 function deleteEntry(idToDelete) {
@@ -380,21 +444,21 @@ function deleteEntry(idToDelete) {
         renderEntries(filterDateInput.value);
         updateDailySummary(filterDateInput.value);
         updateOverallSummary();
-        updateMonthlyBudgetUsage(); // Update monthly usage after deleting entry
+        updateMonthlyBudgetUsage();
     }
 }
 
 function clearAllData() {
     if (confirm('Are you sure you want to clear ALL saved budget data (entries AND budget limits)? This cannot be undone.')) {
         localStorage.removeItem('budgetEntries');
-        localStorage.removeItem('monthlyBudgets'); // Clear budget limits too
+        localStorage.removeItem('monthlyBudgets');
         budgetEntries = [];
-        monthlyBudgets = {}; // Reset in memory
+        monthlyBudgets = {};
         renderEntries(filterDateInput.value);
         updateDailySummary(filterDateInput.value);
         updateOverallSummary();
-        renderBudgetLimits(); // Re-render empty budget limits
-        updateMonthlyBudgetUsage(); // Re-render empty usage
+        renderBudgetLimits(); // Re-render to hide all
+        updateMonthlyBudgetUsage();
         alert('All data cleared!');
     }
 }
@@ -406,19 +470,23 @@ function saveBudgetLimits() {
     }
 
     allCategories.forEach(category => {
-        const inputId = `budget-${category.replace(/[^a-zA-Z0-9]/g, '')}`;
+        const inputId = getCategoryId(category);
         const input = document.getElementById(inputId);
         if (input) {
             const limit = parseFloat(input.value);
             if (!isNaN(limit) && limit >= 0) {
                 monthlyBudgets[category] = limit;
+                // Ensure it's visible if a limit is set
+                document.getElementById(`container-${inputId}`).classList.add('visible');
             } else {
                 delete monthlyBudgets[category]; // Remove if invalid or empty
+                // Hide if limit is removed
+                document.getElementById(`container-${inputId}`).classList.remove('visible');
             }
         }
     });
     saveMonthlyBudgets();
-    updateMonthlyBudgetUsage(); // Update usage display after saving limits
+    updateMonthlyBudgetUsage();
     alert('Monthly budget limits saved!');
 }
 
@@ -439,13 +507,24 @@ clearFilterBtn.addEventListener('click', () => {
     updateDailySummary('');
 });
 
+// New: Event listener for the showBudgetCategory dropdown
+showBudgetCategorySelect.addEventListener('change', (event) => {
+    const selectedCategory = event.target.value;
+    if (selectedCategory === 'show-all') {
+        showAllBudgetLimitInputs();
+    } else if (selectedCategory) { // If a specific category is selected
+        showBudgetLimitInput(selectedCategory);
+    }
+    // Reset the dropdown to its default state after selection
+    event.target.value = '';
+});
+
 // --- Initial Load ---
 populateExpenseCategories();
+populateShowBudgetCategoryDropdown(); // New: Populate this dropdown on load
 renderBudgetLimits();
+updateMonthlyBudgetUsage(); // Call before other summaries as it affects the initial state
 renderEntries(filterDateInput.value);
 updateDailySummary(filterDateInput.value);
 updateOverallSummary();
-updateMonthlyBudgetUsage();
 });
-
-

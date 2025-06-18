@@ -91,11 +91,35 @@ color: #dc3545; /* Red for negative balance */
 }
 
 /* Monthly Budgets Section Styling */
+.budget-limit-controls { /* New style for the dropdown */
+display: flex;
+align-items: center;
+gap: 10px;
+margin-bottom: 15px;
+}
+
+.budget-limit-controls label {
+font-weight: bold;
+color: #555;
+white-space: nowrap; /* Prevent label from wrapping */
+}
+
+.budget-limit-controls select {
+flex-grow: 1;
+margin-bottom: 0; /* Override default input-section margin */
+}
+
 #budgetLimitsContainer div {
 display: flex;
 align-items: center;
 margin-bottom: 10px;
 gap: 10px;
+/* Initially hide elements that are not explicitly shown */
+display: none; /* Default to hidden */
+}
+
+#budgetLimitsContainer div.visible { /* Class to make them visible */
+display: flex;
 }
 
 #budgetLimitsContainer label {
